@@ -1,10 +1,12 @@
 
 import React from 'react';
-import { Text, View, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
 import { commonStyles, colors } from '../styles/commonStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useFonts, Inter_400Regular, Inter_600SemiBold, Inter_700Bold } from '@expo-google-fonts/inter';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function SplashScreen() {
   const router = useRouter();
@@ -69,28 +71,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
-    maxWidth: 400,
+    maxWidth: Math.min(400, screenWidth - 40),
     width: '100%',
+    alignSelf: 'center',
   },
   header: {
     alignItems: 'center',
     marginBottom: 60,
+    width: '100%',
   },
   title: {
-    fontSize: 48,
+    fontSize: Math.min(48, screenWidth * 0.12),
     fontWeight: '700',
     color: colors.primary,
     marginBottom: 8,
     fontFamily: 'Inter_700Bold',
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: Math.min(18, screenWidth * 0.045),
     color: colors.textSecondary,
     fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
   },
   buttonContainer: {
     width: '100%',
     gap: 16,
+    maxWidth: 350,
   },
   primaryButton: {
     backgroundColor: colors.primary,
@@ -100,6 +107,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     boxShadow: '0px 4px 12px rgba(37, 99, 235, 0.3)',
     elevation: 4,
+    width: '100%',
   },
   primaryButtonText: {
     fontSize: 18,
@@ -112,6 +120,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(255, 255, 255, 0.8)',
     fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
   },
   secondaryButton: {
     backgroundColor: colors.backgroundAlt,
@@ -121,6 +130,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 2,
     borderColor: colors.primary,
+    width: '100%',
   },
   secondaryButtonText: {
     fontSize: 18,
@@ -133,6 +143,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.textSecondary,
     fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
   },
   tertiaryButton: {
     backgroundColor: colors.backgroundAlt,
@@ -142,6 +153,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: colors.border,
+    width: '100%',
   },
   tertiaryButtonText: {
     fontSize: 16,
@@ -154,5 +166,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: colors.textSecondary,
     fontFamily: 'Inter_400Regular',
+    textAlign: 'center',
   },
 });

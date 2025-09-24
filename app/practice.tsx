@@ -1,12 +1,14 @@
 
 import React, { useEffect } from 'react';
-import { Text, View, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { Text, View, TouchableOpacity, StyleSheet, ScrollView, Dimensions, Alert } from 'react-native';
 import { commonStyles, colors } from '../styles/commonStyles';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { useGameLogic } from '../hooks/useGameLogic';
 import { getCardDisplayName, getCardColor } from '../utils/gameLogic';
 import { Card } from '../types/game';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export default function PracticeScreen() {
   const router = useRouter();
@@ -25,6 +27,23 @@ export default function PracticeScreen() {
   useEffect(() => {
     startPracticeGame();
   }, [startPracticeGame]);
+
+  // Check for game end
+  useEffect(() => {
+    if (gameState?.gamePhase === 'FINISHED') {
+      const winner = gameState.players.find(p => p.hand.length === 0);
+      if (winner) {
+        Alert.alert(
+          'Game Over!',
+          `${winner.name} wins!`,
+          [
+            { text: 'Play Again', onPress: startPracticeGame },
+            { text: 'Back to Menu', onPress: () => router.back() }
+          ]
+        );
+      }
+    }
+  }, [gameState?.gamePhase]);
 
   const handleBack = () => {
     console.log('Going back to splash screen');
@@ -87,7 +106,9 @@ export default function PracticeScreen() {
   if (!gameState) {
     return (
       <SafeAreaView style={commonStyles.container}>
-        <Text style={commonStyles.text}>Loading game...</Text>
+        <View style={styles.loadingContainer}>
+          <Text style={commonStyles.text}>Loading game...</Text>
+        </View>
       </SafeAreaView>
     );
   }
@@ -160,7 +181,7 @@ export default function PracticeScreen() {
         )}
 
         {/* Action Buttons */}
-        {isHumanTurn && (
+        {isHumanTurn && gameState.gamePhase === 'IN_GAME' && (
           <View style={styles.actionButtons}>
             <TouchableOpacity
               style={[styles.playButton, selectedCards.length === 0 && styles.disabledButton]}
@@ -184,11 +205,20 @@ export default function PracticeScreen() {
           </View>
         )}
 
-        {!isHumanTurn && (
+        {!isHumanTurn && gameState.gamePhase === 'IN_GAME' && (
           <View style={styles.waitingArea}>
             <Text style={styles.waitingText}>
               Waiting for {currentPlayer?.name} to play...
             </Text>
+          </View>
+        )}
+
+        {gameState.gamePhase === 'FINISHED' && (
+          <View style={styles.gameEndArea}>
+            <Text style={styles.gameEndText}>Game Over!</Text>
+            <TouchableOpacity style={styles.playAgainButton} onPress={startPracticeGame}>
+              <Text style={styles.playAgainButtonText}>Play Again</Text>
+            </TouchableOpacity>
           </View>
         )}
       </ScrollView>
@@ -205,6 +235,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    maxWidth: screenWidth,
   },
   backButton: {
     paddingVertical: 8,
@@ -227,9 +258,15 @@ const styles = StyleSheet.create({
   placeholder: {
     width: 60,
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   gameArea: {
     flex: 1,
     paddingHorizontal: 20,
+    maxWidth: screenWidth,
   },
   playersContainer: {
     paddingVertical: 16,
@@ -245,6 +282,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.border,
+    maxWidth: screenWidth - 40,
   },
   currentPlayerInfo: {
     borderColor: colors.primary,
@@ -271,6 +309,7 @@ const styles = StyleSheet.create({
     marginVertical: 16,
     borderWidth: 1,
     borderColor: colors.border,
+    maxWidth: screenWidth - 40,
   },
   sectionTitle: {
     fontSize: 18,
@@ -294,6 +333,8 @@ const styles = StyleSheet.create({
   trickCardContainer: {
     flexDirection: 'row',
     gap: 8,
+    flexWrap: 'wrap',
+    justifyContent: 'center',
   },
   emptyTrick: {
     textAlign: 'center',
@@ -316,6 +357,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     paddingHorizontal: 4,
+    paddingRight: 20,
   },
   card: {
     backgroundColor: colors.card,
@@ -340,6 +382,7 @@ const styles = StyleSheet.create({
   actionButtons: {
     paddingVertical: 20,
     gap: 12,
+    maxWidth: screenWidth - 40,
   },
   playButton: {
     backgroundColor: colors.primary,
@@ -392,5 +435,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: colors.textSecondary,
     textAlign: 'center',
+  },
+  gameEndArea: {
+    paddingVertical: 32,
+    alignItems: 'center',
+    gap: 16,
+  },
+  gameEndText: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: colors.primary,
+    textAlign: 'center',
+  },
+  playAgainButton: {
+    backgroundColor: colors.primary,
+    paddingVertical: 16,
+    paddingHorizontal: 32,
+    borderRadius: 12,
+  },
+  playAgainButtonText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: 'white',
   },
 });

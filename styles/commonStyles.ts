@@ -1,5 +1,7 @@
 
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle, Dimensions } from 'react-native';
+
+const { width: screenWidth } = Dimensions.get('window');
 
 export const colors = {
   primary: '#2563eb',      // Blue
@@ -24,11 +26,13 @@ export const buttonStyles = StyleSheet.create({
     backgroundColor: colors.primary,
     alignSelf: 'center',
     width: '100%',
+    maxWidth: 400,
   },
   backButton: {
     backgroundColor: colors.backgroundAlt,
     alignSelf: 'center',
     width: '100%',
+    maxWidth: 400,
     borderWidth: 1,
     borderColor: colors.border,
   },
@@ -39,14 +43,15 @@ export const commonStyles = StyleSheet.create({
     backgroundColor: colors.background,
     width: '100%',
     height: '100%',
+    maxWidth: screenWidth,
   },
   container: {
     flex: 1,
     backgroundColor: colors.background,
     width: '100%',
     height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
+    maxWidth: screenWidth,
+    alignSelf: 'center',
   },
   content: {
     flex: 1,
@@ -55,20 +60,23 @@ export const commonStyles = StyleSheet.create({
     maxWidth: 800,
     width: '100%',
     paddingHorizontal: 20,
+    alignSelf: 'center',
   },
   title: {
     fontSize: 28,
     fontWeight: '800',
     textAlign: 'center',
     color: colors.text,
-    marginBottom: 12
+    marginBottom: 12,
+    maxWidth: screenWidth - 40,
   },
   subtitle: {
     fontSize: 20,
     fontWeight: '600',
     textAlign: 'center',
     color: colors.text,
-    marginBottom: 8
+    marginBottom: 8,
+    maxWidth: screenWidth - 40,
   },
   text: {
     fontSize: 16,
@@ -77,6 +85,7 @@ export const commonStyles = StyleSheet.create({
     marginBottom: 8,
     lineHeight: 24,
     textAlign: 'center',
+    maxWidth: screenWidth - 40,
   },
   textSecondary: {
     fontSize: 14,
@@ -85,16 +94,19 @@ export const commonStyles = StyleSheet.create({
     marginBottom: 8,
     lineHeight: 20,
     textAlign: 'center',
+    maxWidth: screenWidth - 40,
   },
   section: {
     width: '100%',
     alignItems: 'center',
     paddingHorizontal: 20,
+    maxWidth: screenWidth,
   },
   buttonContainer: {
     width: '100%',
     alignItems: 'center',
     paddingHorizontal: 20,
+    maxWidth: 400,
   },
   card: {
     backgroundColor: colors.card,
@@ -104,6 +116,7 @@ export const commonStyles = StyleSheet.create({
     padding: 16,
     marginVertical: 8,
     width: '100%',
+    maxWidth: screenWidth - 40,
     boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.1)',
     elevation: 2,
   },

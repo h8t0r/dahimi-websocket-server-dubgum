@@ -1,5 +1,5 @@
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { GameState, Player, Move, Card } from '../types/game';
 import { 
   createDeck, 
@@ -9,12 +9,52 @@ import {
   isValidMove, 
   applyMove, 
   applyPass,
-  findThreeOfSpades
+  findThreeOfSpades,
+  getValidMoves
 } from '../utils/gameLogic';
 
 export function useGameLogic() {
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
+
+  // AI logic - automatically play moves for AI players
+  useEffect(() => {
+    if (!gameState) return;
+
+    const currentPlayer = gameState.players[gameState.currentPlayerIndex];
+    const isAIPlayer = currentPlayer.id !== 'player-0';
+    
+    if (isAIPlayer && gameState.gamePhase === 'IN_GAME') {
+      console.log(`AI player ${currentPlayer.name} is thinking...`);
+      
+      // Add a delay to make AI moves feel more natural
+      const aiMoveTimer = setTimeout(() => {
+        makeAIMove(currentPlayer);
+      }, 1000 + Math.random() * 2000); // 1-3 second delay
+
+      return () => clearTimeout(aiMoveTimer);
+    }
+  }, [gameState?.currentPlayerIndex, gameState?.gamePhase]);
+
+  const makeAIMove = useCallback((aiPlayer: Player) => {
+    if (!gameState) return;
+
+    const validMoves = getValidMoves(gameState, aiPlayer.id);
+    
+    if (validMoves.length > 0) {
+      // Simple AI strategy: play the lowest valid cards
+      const bestMove = validMoves[0];
+      console.log(`AI ${aiPlayer.name} playing:`, bestMove.cards.map(c => `${c.rank}${c.suit[0]}`));
+      
+      const newState = applyMove(gameState, aiPlayer.id, bestMove);
+      setGameState(newState);
+    } else {
+      // AI passes
+      console.log(`AI ${aiPlayer.name} passes`);
+      const newState = applyPass(gameState);
+      setGameState(newState);
+    }
+  }, [gameState]);
 
   const startPracticeGame = useCallback(() => {
     console.log('Starting practice game');

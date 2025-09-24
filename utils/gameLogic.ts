@@ -49,6 +49,64 @@ export function findThreeOfSpades(hand: Card[]): Card | null {
   return hand.find(card => card.rank === 3 && card.suit === 'spades') || null;
 }
 
+export function getValidMoves(gameState: GameState, playerId: string): Move[] {
+  const player = gameState.players.find(p => p.id === playerId);
+  if (!player) return [];
+
+  const validMoves: Move[] = [];
+  const { currentTrick } = gameState;
+
+  // Group cards by rank
+  const cardsByRank: Record<number, Card[]> = {};
+  for (const card of player.hand) {
+    if (!cardsByRank[card.rank]) {
+      cardsByRank[card.rank] = [];
+    }
+    cardsByRank[card.rank].push(card);
+  }
+
+  // If starting a new trick
+  if (currentTrick.plays.length === 0) {
+    // First play of the game must include 3 of spades
+    if (gameState.playedRanks[3] === 0) {
+      const threeOfSpades = findThreeOfSpades(player.hand);
+      if (threeOfSpades && cardsByRank[3]) {
+        // Can play any number of 3s including the 3 of spades
+        for (let count = 1; count <= cardsByRank[3].length; count++) {
+          const cards = cardsByRank[3].slice(0, count);
+          if (cards.some(c => c.id === threeOfSpades.id)) {
+            validMoves.push({ cards });
+          }
+        }
+      }
+    } else {
+      // Can start with any rank, any count
+      for (const rank in cardsByRank) {
+        const cards = cardsByRank[rank];
+        for (let count = 1; count <= cards.length; count++) {
+          validMoves.push({ cards: cards.slice(0, count) });
+        }
+      }
+    }
+  } else {
+    // Must match set size and rank requirements
+    const requiredCount = currentTrick.setSize;
+    const minRank = currentTrick.currentRank;
+    const capRank = currentTrick.capRank || 13;
+
+    for (const rank in cardsByRank) {
+      const rankNum = parseInt(rank);
+      const cards = cardsByRank[rankNum];
+      
+      if (cards.length >= requiredCount && rankNum >= minRank && rankNum <= capRank) {
+        validMoves.push({ cards: cards.slice(0, requiredCount) });
+      }
+    }
+  }
+
+  return validMoves;
+}
+
 export function isValidMove(gameState: GameState, playerId: string, move: Move): { valid: boolean; error?: string } {
   const player = gameState.players.find(p => p.id === playerId);
   if (!player) {
@@ -125,6 +183,12 @@ export function applyMove(gameState: GameState, playerId: string, move: Move): G
   }
   player.handCount = player.hand.length;
 
+  // Check for win condition
+  if (player.hand.length === 0) {
+    newState.gamePhase = 'FINISHED';
+    console.log(`${player.name} wins!`);
+  }
+
   // Add to trick
   newState.currentTrick.plays.push({
     playerId,
@@ -159,8 +223,10 @@ export function applyMove(gameState: GameState, playerId: string, move: Move): G
     newState.lastValidPlayer = playerId;
   }
 
-  // Move to next player
-  newState.currentPlayerIndex = (newState.currentPlayerIndex + 1) % newState.players.length;
+  // Move to next player (if game not finished)
+  if (newState.gamePhase !== 'FINISHED') {
+    newState.currentPlayerIndex = (newState.currentPlayerIndex + 1) % newState.players.length;
+  }
 
   return newState;
 }
